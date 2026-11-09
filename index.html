@@ -59,9 +59,9 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                        Corporate Lunch Wheel
+                        E-gineering Lunch Wheel
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Zero-friction team food decider</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Lunch, decided together</p>
                 </div>
             </div>
 
@@ -75,6 +75,10 @@
                 <button onclick="copyShareableLink()" class="inline-flex items-center space-x-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition">
                     <i class="fa-solid fa-share-nodes text-xs"></i>
                     <span>Share Wheel</span>
+                </button>
+
+                <button id="helpButton" onclick="openHelpModal()" aria-label="How to use the lunch wheel" title="How to use" class="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <i class="fa-regular fa-circle-question"></i>
                 </button>
 
                 <button onclick="resetToDefaults()" title="Reset to default choices" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
@@ -298,6 +302,45 @@
         </div>
     </div>
 
+    <div id="helpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle" onclick="if (event.target === this) closeHelpModal()">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-700 text-left max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Quick guide</p>
+                    <h2 id="helpModalTitle" class="text-xl font-black text-slate-900 dark:text-white">Lunch with the E-gineering crew</h2>
+                </div>
+                <button id="closeHelpButton" onclick="closeHelpModal()" aria-label="Close help" class="p-2 -mr-2 -mt-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                <section>
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1">Use the wheel</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Spin to pick a place. The result stays on screen so you can check its notes, website, menu, and hours.</li>
+                        <li>Select <strong>Back to wheel</strong> when you’re ready to spin again.</li>
+                        <li>Tap category filters to include or exclude those types of food. Use the search box to find a place in the list.</li>
+                        <li>Use the <strong>X</strong> beside a place to remove it for now. <strong>Restore</strong> brings removed places back.</li>
+                        <li>Use <strong>Add Spot</strong> to add a restaurant or <strong>Shuffle</strong> to change the order.</li>
+                    </ul>
+                </section>
+
+                <section class="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 p-4">
+                    <h3 class="font-bold text-indigo-900 dark:text-indigo-200 mb-1"><i class="fa-solid fa-share-nodes mr-1.5" aria-hidden="true"></i>How our group of four picks</h3>
+                    <ol class="list-decimal pl-5 space-y-1 text-indigo-900/80 dark:text-indigo-200/90">
+                        <li>Post the starting wheel link in your lunch Slack thread.</li>
+                        <li>One at a time, each of the four people opens the <strong>most recent wheel link in the thread</strong> and removes any places they would rather not have. After making changes, choose <strong>Share Wheel</strong> to post the updated link in the same thread.</li>
+                        <li>The next person always starts from the newest link in the thread, so earlier removals stay out. When all four have had a turn and everyone's ready, open the final link and spin once as a group.</li>
+                    </ol>
+                    <p class="mt-2 text-xs text-indigo-800/75 dark:text-indigo-300/80">The wheel doesn't sync live. To get one shared pick, use one screen and spin together; spins on separate devices are independent and may pick different places. If Slack cuts off the long link, copy and send the complete URL.</p>
+                </section>
+
+                <p class="text-xs text-slate-500 dark:text-slate-400">Use the reset button in the header to restore the original default list.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Application Script -->
     <script>
         const DEFAULT_RESTAURANTS = [
@@ -309,7 +352,7 @@
             active: true,
             web: "https://bibibop.com",
             menu: "https://order.bibibop.com/menu/bibibop-keystone-rivers-edge/",
-            notes: "Build-your-own healthy Korean bowls; fast counter service with GF options"
+            notes: "Build-your-own Korean-inspired bowls; counter service; gluten-free options"
           },
           {
             id: '2',
@@ -319,7 +362,7 @@
             active: true,
             web: "https://www.pfchangs.com",
             menu: "https://locations.pfchangs.com/in/indianapolis/8601-keystone-crossing.html",
-            notes: "Sit-down Asian chain at Keystone Crossing; good for larger group dinners"
+            notes: "Asian and Chinese menu; dine-in at Keystone Crossing"
           },
           {
             id: '3',
@@ -329,7 +372,7 @@
             active: true,
             web: "https://cafekoreabbq.com",
             menu: "https://cafekoreabbq.com",
-            notes: "Authentic family-run Korean bistro on Allisonville Rd; dinner service only"
+            notes: "Korean cuisine on Allisonville Rd; dinner service only"
           },
           {
             id: '4',
@@ -339,7 +382,7 @@
             active: true,
             web: "https://metrodiner.com",
             menu: "https://metrodiner.com/locations/indiana/clearwater-crossing/",
-            notes: "Hearty diner classics; great for quick breakfast and team lunch"
+            notes: "Diner-style breakfast and lunch menu"
           },
           {
             id: '5',
@@ -349,7 +392,7 @@
             active: true,
             web: "https://puccinispizzapasta.com",
             menu: "https://puccinispizzapasta.com",
-            notes: "Local pizza and pasta chain at Clearwater Crossing; solid vegetarian/GF selection"
+            notes: "Pizza and pasta at Clearwater Crossing; vegetarian and gluten-free options"
           },
           {
             id: '6',
@@ -359,7 +402,7 @@
             active: true,
             web: "https://curryleafindianfusion.com",
             menu: "https://curryleafindianfusion.com",
-            notes: "High-rated Indian fusion kitchen near Keystone; great lunch specials"
+            notes: "Indian fusion cuisine near Keystone; lunch specials"
           },
           {
             id: '7',
@@ -379,7 +422,7 @@
             active: true,
             web: "https://www.corelifeeatery.com",
             menu: "https://www.corelifeeatery.com",
-            notes: "Fast-casual grain bowls, warm broth bowls, and fresh salads"
+            notes: "Grain bowls, broth bowls, and salads; fast-casual service"
           },
           {
             id: '9',
@@ -389,7 +432,7 @@
             active: true,
             web: "https://www.bruburgerbar.com",
             menu: "https://www.bruburgerbar.com/location/bru-burger-bar-keystone-in/",
-            notes: "Gourmet burgers and craft beers at River Crossing"
+            notes: "Burgers and craft beer at River Crossing"
           },
           {
             id: '10',
@@ -399,7 +442,7 @@
             active: true,
             web: "https://www.citybbq.com",
             menu: "https://www.citybbq.com",
-            notes: "Counter-serve smokehouse BBQ; fast turnarounds for lunch groups"
+            notes: "Barbecue; counter service"
           },
           {
             id: '11',
@@ -409,7 +452,7 @@
             active: true,
             web: "https://www.fiveguys.com",
             menu: "https://restaurants.fiveguys.com/5317-east-82nd-street",
-            notes: "Made-to-order burgers and fries; fast ordering"
+            notes: "Made-to-order burgers and fries"
           },
           {
             id: '12',
@@ -419,7 +462,7 @@
             active: true,
             web: "https://mypiada.com",
             menu: "https://mypiada.com/menu/keystone",
-            notes: "Italian wraps, pasta bowls, and street salads; fast-casual assembly line"
+            notes: "Italian wraps, pasta bowls, and salads; fast-casual service"
           },
           {
             id: '13',
@@ -429,7 +472,7 @@
             active: true,
             web: "https://www.thedistricttap.com",
             menu: "https://www.thedistricttap.com",
-            notes: "Huge tap list and pub plates; right down the road on 82nd St"
+            notes: "Pub food and draft beer on 82nd St"
           },
           {
             id: '14',
@@ -439,7 +482,7 @@
             active: true,
             web: "https://aleemporium.com",
             menu: "https://aleemporium.securetree.com/",
-            notes: "Famous Hermanaki wings and deep-dish pizza on Allisonville Rd; very close"
+            notes: "Hermanaki wings and deep-dish pizza on Allisonville Rd"
           },
           {
             id: '15',
@@ -449,7 +492,7 @@
             active: true,
             web: "https://www.firstwatch.com",
             menu: "https://www.firstwatch.com/locations/clearwater-crossing/",
-            notes: "Healthy breakfast and lunch spot at Clearwater Crossing; closes at 2:30 PM"
+            notes: "Breakfast and lunch; Clearwater Crossing; closes at 2:30 PM"
           }
         ]
 
@@ -480,6 +523,11 @@
             window.addEventListener('resize', () => {
                 setupCanvasResolution();
                 drawWheel();
+            });
+            window.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !document.getElementById('helpModal').classList.contains('hidden')) {
+                    closeHelpModal();
+                }
             });
         });
 
@@ -910,6 +958,16 @@
 
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function openHelpModal() {
+            document.getElementById('helpModal').classList.remove('hidden');
+            document.getElementById('closeHelpButton').focus();
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').classList.add('hidden');
+            document.getElementById('helpButton').focus();
         }
 
         function closeAddModal() {
