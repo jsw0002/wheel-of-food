@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Lunch Wheel - No-Login Decision Maker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+    <!-- Header Navigation Bar -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-emerald-500 to-teal-600 p-2.5 rounded-xl text-white shadow-md shadow-emerald-500/20">
+                    <i class="fa-solid font-bold fa-utensils text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                        Corporate Lunch Wheel
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Zero-friction team food decider</p>
+                </div>
+            </div>
+
+            <!-- Top Right Action Controls -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="openAddModal()" class="inline-flex items-center space-x-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 transition">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="hidden sm:inline">Add Spot</span>
+                </button>
+
+                <button onclick="copyShareableLink()" class="inline-flex items-center space-x-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition">
+                    <i class="fa-solid fa-share-nodes text-xs"></i>
+                    <span>Share Wheel</span>
+                </button>
+
+                <button onclick="resetToDefaults()" title="Reset to default choices" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <button onclick="toggleDarkMode()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Panel: Interactive Wheel & Controls -->
+        <section class="lg:col-span-7 flex flex-col items-center justify-center space-y-6">
+            
+            <div id="toastNotification" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-sm font-medium transition-all transform duration-300 translate-y-2">
+                <i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600 text-lg"></i>
+                <span id="toastMessage">Link copied to clipboard!</span>
+            </div>
+
+            <!-- Monday Warning Alert Banner -->
+            <div id="mondayBanner" class="hidden w-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 text-xs sm:text-sm text-amber-800 dark:text-amber-300 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-calendar-day text-amber-600 text-base flex-shrink-0"></i>
+                    <span><strong>Monday Hours Warning:</strong> Some local spots are closed on Mondays. Use the "Verify Hours" button on winners!</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-amber-500 hover:text-amber-700 ml-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Wheel Container Box -->
+            <div class="relative w-full max-w-[460px] aspect-square flex items-center justify-center p-2 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700/60">
+                
+                <!-- Wheel Pointer -->
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none drop-shadow-md">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 34L8 10C8 10 14 6 20 6C26 6 32 10 32 10L20 34Z" fill="#EF4444" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"/>
+                        <circle cx="20" cy="12" r="3" fill="#FFFFFF"/>
+                    </svg>
+                </div>
+
+                <canvas id="wheelCanvas" class="w-full h-full rounded-full cursor-pointer transition-transform duration-100 active:scale-[0.99]"></canvas>
+
+                <button id="spinBtnCenter" onclick="spinWheel()" class="absolute z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-slate-900 to-slate-800 text-white dark:from-white dark:to-slate-100 dark:text-slate-900 shadow-2xl flex flex-col items-center justify-center font-black tracking-wider text-sm sm:text-base border-4 border-white dark:border-slate-800 hover:scale-105 active:scale-95 transition-transform duration-150 group">
+                    <span class="group-hover:scale-110 transition-transform">SPIN</span>
+                    <i class="fa-solid fa-arrows-spin text-xs opacity-60 mt-0.5 group-hover:rotate-180 transition-transform duration-500"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-center space-x-4 w-full max-w-[460px]">
+                <button id="spinBtnMain" onclick="spinWheel()" class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-lg shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-dharmachakra"></i>
+                    <span>SPIN THE WHEEL</span>
+                </button>
+                <button onclick="shuffleOptions()" title="Shuffle Order" class="p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl shadow-sm transition">
+                    <i class="fa-solid fa-shuffle text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between w-full max-w-[460px] px-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <span id="activeCountText">0 items on wheel</span>
+                <span id="totalEliminatedText">0 removed</span>
+            </div>
+
+        </section>
+
+        <!-- Right Panel: Filters & Clean Active Restaurant List -->
+        <section class="lg:col-span-5 flex flex-col space-y-4">
+            
+            <!-- Category Filter Pills Card -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/60 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-filter"></i>
+                        <span>Filter Categories</span>
+                    </span>
+                    <div class="space-x-2 text-xs">
+                        <button onclick="selectAllFilters(true)" class="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">Select All</button>
+                        <span class="text-slate-300">|</span>
+                        <button onclick="selectAllFilters(false)" class="text-slate-400 hover:underline">Clear All</button>
+                    </div>
+                </div>
+                
+                <div id="categoryPillsContainer" class="flex flex-wrap gap-1.5">
+                    <!-- Dynamic Pills -->
+                </div>
+            </div>
+
+            <!-- Active Clean Restaurant Checklist -->
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-700/60 flex flex-col h-[480px]">
+                
+                <div class="pb-3 border-b border-slate-100 dark:border-slate-700 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center space-x-2">
+                            <span>Active Options</span>
+                            <span id="listBadge" class="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                        </h2>
+                        <button onclick="restoreAllRemoved()" id="restoreBtn" class="hidden text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold flex items-center space-x-1">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Restore (<span id="removedCountNum">0</span>)</span>
+                        </button>
+                    </div>
+
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="renderList()" placeholder="Search active options..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                    </div>
+                </div>
+
+                <!-- Clean List without scrolling through crossed out items -->
+                <div id="restaurantList" class="flex-1 overflow-y-auto pt-2 space-y-2 pr-1">
+                    <!-- Filtered items appear here -->
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between space-x-2">
+                    <button onclick="openAddModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus text-emerald-500"></i>
+                        <span>Add New Spot</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal: Winner Result Modal -->
+    <div id="winnerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-700 text-center transform transition-all scale-95 animate-in fade-in zoom-in duration-200 relative overflow-hidden">
+            
+            <div class="mx-auto w-16 h-16 bg-gradient-to-tr from-amber-400 to-amber-500 text-white rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-amber-500/30 mb-4">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Winner Picked!</p>
+            <h2 id="winnerName" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Restaurant Name</h2>
+            
+            <div class="flex items-center justify-center flex-wrap gap-2 mb-4" id="winnerBadges"></div>
+
+            <div id="winnerNotesContainer" class="hidden text-left bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-xl p-3.5 mb-6">
+                <div class="flex items-start space-x-2 text-amber-800 dark:text-amber-300 text-xs">
+                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <strong class="font-semibold block mb-0.5">Notes & Hours Tip:</strong>
+                        <span id="winnerNotesText">Note content</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direct Actions -->
+            <div class="grid grid-cols-2 gap-2.5 mb-6">
+                <a id="winnerWebBtn" href="#" target="_blank" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-globe text-indigo-500"></i>
+                    <span>Website</span>
+                </a>
+                <a id="winnerMenuBtn" href="#" target="_blank" class="flex items-center justify-center space-x-2 py-2.5 px-3 bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-book-open text-emerald-500"></i>
+                    <span>Menu</span>
+                </a>
+                <a id="winnerHoursBtn" href="#" target="_blank" class="col-span-2 flex items-center justify-center space-x-2 py-2.5 px-3 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-900 dark:text-amber-200 text-xs font-bold rounded-xl transition border border-amber-200 dark:border-amber-800">
+                    <i class="fa-solid fa-clock text-amber-600"></i>
+                    <span>Verify Live Hours on Google</span>
+                </a>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="closeWinnerModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition text-sm">
+                    Accept & Go Here!
+                </button>
+                <button onclick="removeWinnerAndRespin()" class="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-300 font-semibold rounded-xl border border-rose-200 dark:border-rose-800/60 transition text-xs flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Place Closed / Remove & Respin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Custom Restaurant -->
+    <div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-700 text-left">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700 mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-store text-emerald-500"></i>
+                    <span>Add New Local Restaurant</span>
+                </h3>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="addRestaurantForm" onsubmit="handleAddRestaurant(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Restaurant Name *</label>
+                    <input type="text" id="addName" required placeholder="e.g. Sal's Authentic Deli" class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Category *</label>
+                        <select id="addCategory" class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="Burgers">Burgers</option>
+                            <option value="Mexican">Mexican</option>
+                            <option value="Asian">Asian</option>
+                            <option value="Fast Casual" selected>Fast Casual</option>
+                            <option value="Sit-Down">Sit-Down</option>
+                            <option value="Italian">Italian</option>
+                            <option value="BBQ">BBQ</option>
+                            <option value="Salads/Healthy">Salads/Healthy</option>
+                            <option value="Sandwiches/Deli">Sandwiches/Deli</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Distance (Miles)</label>
+                        <input type="text" id="addDistance" placeholder="e.g. 0.8 mi" class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Website URL</label>
+                        <input type="url" id="addWeb" placeholder="https://..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Menu Link URL</label>
+                        <input type="url" id="addMenu" placeholder="https://..." class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Notes & Warning Hints</label>
+                    <input type="text" id="addNotes" placeholder="e.g. Closed Mondays, Great patio, Fast service" class="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="pt-3 flex items-center justify-end space-x-3 border-t border-slate-100 dark:border-slate-700">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition shadow-md shadow-emerald-600/20">
+                        Save to Wheel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const DEFAULT_RESTAURANTS = [
+            { id: '1', name: "Chipotle Mexican Grill", category: "Mexican", distance: "0.4 mi", active: true, web: "https://chipotle.com", menu: "https://chipotle.com/order", notes: "Fast line, good for quick group lunches" },
+            { id: '2', name: "Panera Bread", category: "Salads/Healthy", distance: "0.6 mi", active: true, web: "https://panerabread.com", menu: "https://panerabread.com/menu", notes: "Order ahead on app to avoid waiting" },
+            { id: '3', name: "Jersey Mike's Subs", category: "Sandwiches/Deli", distance: "0.5 mi", active: true, web: "https://jerseymikes.com", menu: "https://jerseymikes.com/menu", notes: "Mike's Way! Very fast sandwich prep" },
+            { id: '4', name: "Shake Shack", category: "Burgers", distance: "1.1 mi", active: true, web: "https://shakeshack.com", menu: "https://shakeshack.com/menu", notes: "Can get busy around 12:15 PM" },
+            { id: '5', name: "Panda Express", category: "Asian", distance: "0.8 mi", active: true, web: "https://pandaexpress.com", menu: "https://pandaexpress.com/menu", notes: "Quick fast-casual bowl options" },
+            { id: '6', name: "Local Smokehouse BBQ", category: "BBQ", distance: "1.4 mi", active: true, web: "https://google.com/search?q=Local+Smokehouse+BBQ", menu: "", notes: "Closed Mondays! Large outdoor seating" },
+            { id: '7', name: "Olive Garden / Pasta Co", category: "Italian", distance: "1.8 mi", active: true, web: "https://olivegarden.com", menu: "https://olivegarden.com/menu", notes: "Sit-down meal. Expect 60 mins total" },
+            { id: '8', name: "Noodle House & Ramen", category: "Asian", distance: "1.2 mi", active: true, web: "https://google.com/search?q=Ramen+Noodle+House", menu: "", notes: "Limited group seating > 6 people" },
+            { id: '9', name: "Tacoria Street Tacos", category: "Mexican", distance: "0.9 mi", active: true, web: "https://google.com/search?q=Tacoria+Street+Tacos", menu: "", notes: "Great outdoor patio & quick service" },
+            { id: '10', name: "Sweetgreen Salads", category: "Salads/Healthy", distance: "0.7 mi", active: true, web: "https://sweetgreen.com", menu: "https://sweetgreen.com/menu", notes: "Healthy bowls, clean eating" },
+            { id: '11', name: "Five Guys Burgers", category: "Burgers", distance: "1.3 mi", active: true, web: "https://fiveguys.com", menu: "https://fiveguys.com/menu", notes: "Generous fries portion to share" },
+            { id: '12', name: "Firehouse Subs", category: "Sandwiches/Deli", distance: "1.0 mi", active: true, web: "https://firehousesubs.com", menu: "https://firehousesubs.com/menu", notes: "Hot toasted sub sandwiches" },
+            { id: '13', name: "Bistro Sit-Down Grill", category: "Sit-Down", distance: "1.5 mi", active: true, web: "https://google.com/search?q=Local+Bistro+Grill", menu: "", notes: "Call ahead for reservations on Fridays" },
+            { id: '14', name: "Cava Mediterranean", category: "Fast Casual", distance: "0.9 mi", active: true, web: "https://cava.com", menu: "https://cava.com/menu", notes: "Custom grain bowls and pita dips" }
+        ];
+
+        const SECTOR_COLORS = [
+            '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', 
+            '#06B6D4', '#F97316', '#84CC16', '#6366F1', '#D97706',
+            '#14B8A6', '#A855F7', '#EF4444'
+        ];
+
+        let restaurants = [];
+        let categories = [];
+        let disabledCategories = new Set();
+        let currentRotation = 0;
+        let isSpinning = false;
+        let lastWinningId = null;
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initDarkMode();
+            checkMondayStatus();
+            loadStateFromUrlOrDefaults();
+            setupCanvasResolution();
+            renderCategoryPills();
+            renderList();
+            drawWheel();
+
+            window.addEventListener('resize', () => {
+                setupCanvasResolution();
+                drawWheel();
+            });
+        });
+
+        function syncStateToUrl() {
+            try {
+                const payload = {
+                    r: restaurants.map(item => ({
+                        i: item.id,
+                        n: item.name,
+                        c: item.category,
+                        d: item.distance,
+                        a: item.active ? 1 : 0,
+                        w: item.web || '',
+                        m: item.menu || '',
+                        o: item.notes || ''
+                    })),
+                    dc: Array.from(disabledCategories)
+                };
+                const jsonStr = JSON.stringify(payload);
+                const encoded = btoa(encodeURIComponent(jsonStr));
+                window.location.hash = `state=${encoded}`;
+            } catch (e) {
+                console.warn('URL state sync failed', e);
+            }
+        }
+
+        function loadStateFromUrlOrDefaults() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('state=')) {
+                try {
+                    const encoded = hash.split('state=')[1];
+                    const jsonStr = decodeURIComponent(atob(encoded));
+                    const data = JSON.parse(jsonStr);
+
+                    if (data && Array.isArray(data.r)) {
+                        restaurants = data.r.map(item => ({
+                            id: item.i,
+                            name: item.n,
+                            category: item.c,
+                            distance: item.d,
+                            active: item.a === 1,
+                            web: item.w,
+                            menu: item.m,
+                            notes: item.o
+                        }));
+                        disabledCategories = new Set(data.dc || []);
+                        extractCategories();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse URL state', e);
+                }
+            }
+
+            restaurants = JSON.parse(JSON.stringify(DEFAULT_RESTAURANTS));
+            disabledCategories.clear();
+            extractCategories();
+        }
+
+        function extractCategories() {
+            const set = new Set(restaurants.map(r => r.category));
+            categories = Array.from(set).sort();
+        }
+
+        function resetToDefaults() {
+            if (confirm('Reset wheel back to default master list?')) {
+                restaurants = JSON.parse(JSON.stringify(DEFAULT_RESTAURANTS));
+                disabledCategories.clear();
+                extractCategories();
+                syncStateToUrl();
+                renderCategoryPills();
+                renderList();
+                drawWheel();
+                showToast('Reset to default list');
+            }
+        }
+
+        function checkMondayStatus() {
+            if (new Date().getDay() === 1) {
+                document.getElementById('mondayBanner').classList.remove('hidden');
+            }
+        }
+
+        function setupCanvasResolution() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        function getActiveWheelItems() {
+            return restaurants.filter(r => r.active && !disabledCategories.has(r.category));
+        }
+
+        function drawWheel() {
+            const items = getActiveWheelItems();
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(centerX, centerY) - 10;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const activeCount = items.length;
+            const totalEliminated = restaurants.length - activeCount;
+            document.getElementById('activeCountText').innerText = `${activeCount} options on wheel`;
+            document.getElementById('totalEliminatedText').innerText = `${totalEliminated} removed`;
+
+            if (items.length === 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#f1f5f9';
+                ctx.fill();
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.fillStyle = '#64748b';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('All spots removed/filtered!', centerX, centerY - 12);
+                ctx.font = '12px sans-serif';
+                ctx.fillText('Click restore to re-add options', centerX, centerY + 12);
+                ctx.restore();
+                return;
+            }
+
+            const arcSize = (Math.PI * 2) / items.length;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(currentRotation);
+
+            items.forEach((item, index) => {
+                const angle = index * arcSize;
+                const color = SECTOR_COLORS[index % SECTOR_COLORS.length];
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, angle, angle + arcSize);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FFFFFF';
+                
+                const fontSize = Math.max(10, Math.min(15, 240 / items.length));
+                ctx.font = `bold ${fontSize}px sans-serif`;
+
+                let label = item.name;
+                const maxChars = items.length > 15 ? 12 : 20;
+                if (label.length > maxChars) {
+                    label = label.substring(0, maxChars - 2) + '..';
+                }
+
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(label, radius - 20, 0);
+                ctx.restore();
+            });
+
+            ctx.restore();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            const items = getActiveWheelItems();
+
+            if (items.length === 0) {
+                alert('No restaurants active! Please restore or add a restaurant to spin.');
+                return;
+            }
+
+            if (items.length === 1) {
+                showWinner(items[0]);
+                return;
+            }
+
+            isSpinning = true;
+            document.getElementById('spinBtnMain').disabled = true;
+            document.getElementById('spinBtnCenter').disabled = true;
+
+            const extraRotations = 5 + Math.floor(Math.random() * 5);
+            const randomOffset = Math.random() * Math.PI * 2;
+            const targetRotation = currentRotation + (extraRotations * Math.PI * 2) + randomOffset;
+            
+            const duration = 4500;
+            const startTime = performance.now();
+            const startRotation = currentRotation;
+
+            function easeOutCubic(t) {
+                return 1 - Math.pow(1 - t, 3);
+            }
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeOutCubic(progress);
+
+                currentRotation = startRotation + (targetRotation - startRotation) * easedProgress;
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    document.getElementById('spinBtnMain').disabled = false;
+                    document.getElementById('spinBtnCenter').disabled = false;
+                    determineWinner(items);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function determineWinner(items) {
+            const arcSize = (Math.PI * 2) / items.length;
+            let normalizedAngle = (currentRotation % (Math.PI * 2));
+            if (normalizedAngle < 0) normalizedAngle += Math.PI * 2;
+
+            const pointerAngle = (3 * Math.PI) / 2;
+            let winningAngle = (pointerAngle - normalizedAngle) % (Math.PI * 2);
+            if (winningAngle < 0) winningAngle += Math.PI * 2;
+
+            const winningIndex = Math.floor(winningAngle / arcSize) % items.length;
+            const winner = items[winningIndex];
+
+            lastWinningId = winner.id;
+            showWinner(winner);
+        }
+
+        function shuffleOptions() {
+            if (isSpinning) return;
+            for (let i = restaurants.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [restaurants[i], restaurants[j]] = [restaurants[j], restaurants[i]];
+            }
+            syncStateToUrl();
+            renderList();
+            drawWheel();
+            showToast('Shuffled wheel order');
+        }
+
+        function showWinner(winner) {
+            document.getElementById('winnerName').innerText = winner.name;
+
+            const badgesContainer = document.getElementById('winnerBadges');
+            badgesContainer.innerHTML = `
+                <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold">${winner.category}</span>
+                ${winner.distance ? `<span class="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold"><i class="fa-solid fa-location-dot mr-1"></i>${winner.distance}</span>` : ''}
+            `;
+
+            const webBtn = document.getElementById('winnerWebBtn');
+            const menuBtn = document.getElementById('winnerMenuBtn');
+            const hoursBtn = document.getElementById('winnerHoursBtn');
+
+            webBtn.href = winner.web || `https://www.google.com/search?q=${encodeURIComponent(winner.name + ' restaurant')}`;
+            menuBtn.href = winner.menu || `https://www.google.com/search?q=${encodeURIComponent(winner.name + ' menu')}`;
+            hoursBtn.href = `https://www.google.com/search?q=${encodeURIComponent(winner.name + ' hours location menu')}`;
+
+            const notesContainer = document.getElementById('winnerNotesContainer');
+            const notesText = document.getElementById('winnerNotesText');
+
+            if (winner.notes && winner.notes.trim() !== '') {
+                notesText.innerText = winner.notes;
+                notesContainer.classList.remove('hidden');
+            } else {
+                notesContainer.classList.add('hidden');
+            }
+
+            document.getElementById('winnerModal').classList.remove('hidden');
+
+            try {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            } catch (e) {}
+        }
+
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').classList.add('hidden');
+        }
+
+        function removeWinnerAndRespin() {
+            closeWinnerModal();
+            if (lastWinningId) {
+                toggleRestaurant(lastWinningId, false);
+                setTimeout(() => { spinWheel(); }, 300);
+            }
+        }
+
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPillsContainer');
+            container.innerHTML = '';
+
+            categories.forEach(cat => {
+                const isSelected = !disabledCategories.has(cat);
+                const pill = document.createElement('button');
+                pill.onclick = () => toggleCategoryFilter(cat);
+                pill.className = `px-2.5 py-1 text-xs font-semibold rounded-lg transition flex items-center space-x-1 ${
+                    isSelected 
+                        ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-sm' 
+                        : 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 line-through'
+                }`;
+                pill.innerHTML = `<span>${cat}</span>`;
+                container.appendChild(pill);
+            });
+        }
+
+        function toggleCategoryFilter(category) {
+            if (disabledCategories.has(category)) {
+                disabledCategories.delete(category);
+            } else {
+                disabledCategories.add(category);
+            }
+            syncStateToUrl();
+            renderCategoryPills();
+            renderList();
+            drawWheel();
+        }
+
+        function selectAllFilters(enableAll) {
+            if (enableAll) {
+                disabledCategories.clear();
+            } else {
+                categories.forEach(c => disabledCategories.add(c));
+            }
+            syncStateToUrl();
+            renderCategoryPills();
+            renderList();
+            drawWheel();
+        }
+
+        // Clean Render List - Completely hides removed/deselected options
+        function renderList() {
+            const container = document.getElementById('restaurantList');
+            const searchQuery = (document.getElementById('searchInput').value || '').toLowerCase();
+            container.innerHTML = '';
+
+            // Filter ONLY active items that match search and enabled categories
+            const activeList = restaurants.filter(item => {
+                const isCatEnabled = !disabledCategories.has(item.category);
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery) ||
+                                     item.category.toLowerCase().includes(searchQuery) ||
+                                     (item.notes && item.notes.toLowerCase().includes(searchQuery));
+                return item.active && isCatEnabled && matchesSearch;
+            });
+
+            // Count inactive or category-disabled items for restore option
+            const removedCount = restaurants.filter(item => !item.active || disabledCategories.has(item.category)).length;
+
+            document.getElementById('listBadge').innerText = activeList.length;
+
+            const restoreBtn = document.getElementById('restoreBtn');
+            const removedCountNum = document.getElementById('removedCountNum');
+            if (removedCount > 0) {
+                restoreBtn.classList.remove('hidden');
+                removedCountNum.innerText = removedCount;
+            } else {
+                restoreBtn.classList.add('hidden');
+            }
+
+            if (activeList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400 text-xs space-y-2">
+                        <i class="fa-solid fa-filter-circle-xmark text-2xl text-slate-300"></i>
+                        <p class="font-medium">No options match current filters.</p>
+                        ${removedCount > 0 ? '<button onclick="restoreAllRemoved()" class="text-emerald-600 hover:underline font-bold">Restore Removed Places</button>' : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            activeList.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'p-2.5 rounded-xl border bg-white dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700/70 hover:border-slate-300 transition flex items-center justify-between group';
+
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3 min-w-0 flex-1">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center space-x-2">
+                                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${item.name}</h4>
+                                ${item.notes && item.notes.toLowerCase().includes('closed monday') ? '<span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-1.5 py-0.2 rounded font-semibold flex-shrink-0">Mon Warning</span>' : ''}
+                            </div>
+                            <div class="flex items-center space-x-2 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                                <span>${item.category}</span>
+                                ${item.distance ? `<span>•</span><span>${item.distance}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-1 ml-2">
+                        <!-- Click X to drop item entirely from visible active list -->
+                        <button onclick="toggleRestaurant('${item.id}', false)" title="Remove for today" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        function toggleRestaurant(id, activeState) {
+            const target = restaurants.find(r => r.id === id);
+            if (target) {
+                target.active = activeState;
+                syncStateToUrl();
+                renderList();
+                drawWheel();
+            }
+        }
+
+        function restoreAllRemoved() {
+            restaurants.forEach(r => r.active = true);
+            disabledCategories.clear();
+            syncStateToUrl();
+            renderCategoryPills();
+            renderList();
+            drawWheel();
+            showToast('Restored all removed spots!');
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('addRestaurantForm').reset();
+        }
+
+        function handleAddRestaurant(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('addName').value.trim();
+            const category = document.getElementById('addCategory').value;
+            const distance = document.getElementById('addDistance').value.trim();
+            const web = document.getElementById('addWeb').value.trim();
+            const menu = document.getElementById('addMenu').value.trim();
+            const notes = document.getElementById('addNotes').value.trim();
+
+            if (!name) return;
+
+            const newSpot = {
+                id: Date.now().toString(),
+                name: name,
+                category: category,
+                distance: distance || '1.0 mi',
+                active: true,
+                web: web,
+                menu: menu,
+                notes: notes
+            };
+
+            restaurants.unshift(newSpot);
+            extractCategories();
+            syncStateToUrl();
+            renderCategoryPills();
+            renderList();
+            drawWheel();
+            closeAddModal();
+            showToast(`Added "${name}" to wheel!`);
+        }
+
+        function copyShareableLink() {
+            syncStateToUrl();
+            const shareUrl = window.location.href;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('Link copied! Shared wheel ready.');
+            }).catch(() => {
+                prompt('Copy this link to share the wheel state:', shareUrl);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const msg = document.getElementById('toastMessage');
+            msg.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function initDarkMode() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>
