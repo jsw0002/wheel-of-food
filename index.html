@@ -301,133 +301,157 @@
     <!-- Application Script -->
     <script>
         const DEFAULT_RESTAURANTS = [
-            { 
-                id: '1', 
-                name: 'Puccini\'s Pizza Pasta (82nd St)', 
-                category: 'Italian / Pizza', 
-                distance: '1.0 mi', 
-                menu: 'https://puccinispizzapasta.com/', 
-                notes: 'Full sit-down service. Great lunch slice combos, pasta, and salads under $15.', 
-                active: true 
-            },
-            { 
-                id: '2', 
-                name: 'District Tap', 
-                category: 'Pub & Grill', 
-                distance: '0.8 mi', 
-                menu: 'https://thedistricttap.com/', 
-                notes: 'Casual sit-down pub on 82nd. Burgers, flatbreads, and giant salads.', 
-                active: true 
-            },
-            { 
-                id: '3', 
-                name: 'Ale Emporium (Castleton)', 
-                category: 'Pub / Pizza / Wings', 
-                distance: '2.4 mi', 
-                menu: 'https://aleemporium.com/', 
-                notes: 'Hermanaki wings and deep dish pizza. Casual, quick table service.', 
-                active: true 
-            },
-            { 
-                id: '4', 
-                name: 'Yats (86th St)', 
-                category: 'Cajun / Creole', 
-                distance: '1.4 mi', 
-                menu: 'https://yatscajuncreole.com/', 
-                notes: 'Extremely fast sit-down. Big chili, étouffée, & bread plates for ~$10-12.', 
-                active: true 
-            },
-            { 
-                id: '5', 
-                name: 'Chatham Tap (Fishers/Castleton)', 
-                category: 'Pub / Sandwiches', 
-                distance: '2.5 mi', 
-                menu: 'https://chathamtap.com/', 
-                notes: 'Casual pub sit-down. Excellent sandwiches, wraps, and fish & chips.', 
-                active: true 
-            },
-            { 
-                id: '6', 
-                name: 'BWW (Castleton)', 
-                category: 'American / Sports Bar', 
-                distance: '2.2 mi', 
-                menu: 'https://www.buffalowildwings.com/', 
-                notes: 'Reliable sit-down lunch combos and wings.', 
-                active: true 
-            },
-            { 
-                id: '7', 
-                name: 'First Watch (86th St)', 
-                category: 'Breakfast / Lunch', 
-                distance: '1.2 mi', 
-                menu: 'https://www.firstwatch.com/', 
-                notes: 'Casual daytime sit-down. Omelets, power bowls, and sandwiches under $15.', 
-                active: true 
-            },
-            { 
-                id: '8', 
-                name: 'Masa Sake Grill', 
-                category: 'Japanese / Sushi', 
-                distance: '1.0 mi', 
-                menu: 'http://www.masasakegrill.com/', 
-                notes: 'Casual table service with affordable bento box lunch specials.', 
-                active: true 
-            },
-            { 
-                id: '9', 
-                name: 'Red Robin (Castleton)', 
-                category: 'American / Burgers', 
-                distance: '2.5 mi', 
-                menu: 'https://www.redrobin.com/', 
-                notes: 'Casual sit-down burger joint with bottomless fries.', 
-                active: true 
-            },
-            { 
-                id: '10', 
-                name: 'Buca di Beppo (Castleton)', 
-                category: 'Italian', 
-                distance: '2.1 mi', 
-                menu: 'https://www.bucadibeppo.com/', 
-                notes: 'Family-style sit-down lunch specials. Great if 4+ people go together.', 
-                active: true 
-            },
-            { 
-                id: '11', 
-                name: 'Kona Grill', 
-                category: 'American / Sushi', 
-                distance: '1.7 mi', 
-                menu: 'https://www.konagrill.com/', 
-                notes: 'Sit-down at Fashion Mall. Mid-tier pricing with good lunch sliders/sushi.', 
-                active: true 
-            },
-            { 
-                id: '12', 
-                name: 'Doc B\'s Restaurant', 
-                category: 'American (Upscale)', 
-                distance: '1.7 mi', 
-                menu: 'https://www.docbsrestaurant.com/locations/indianapolis', 
-                notes: 'Higher budget ($20+). Inactive by default for casual runs.', 
-                active: false 
-            },
-            { 
-                id: '13', 
-                name: 'North Italia', 
-                category: 'Italian (Upscale)', 
-                distance: '1.6 mi', 
-                menu: 'https://www.northitalia.com/', 
-                notes: 'Higher budget ($22+). Inactive by default.', 
-                active: false 
-            },
-            { 
-                id: '14', 
-                name: 'Cooper\'s Hawk Winery', 
-                category: 'American (Upscale)', 
-                distance: '1.8 mi', 
-                menu: 'https://chwinery.com/locations/indiana/indianapolis', 
-                notes: 'Higher budget ($22+). Inactive by default.', 
-                active: false 
-            }
-        ];
+          {
+            id: '1',
+            name: "BIBIBOP Asian Grill",
+            category: "Asian Fusion / Korean",
+            distance: "0.6 mi",
+            active: true,
+            web: "https://bibibop.com",
+            menu: "https://order.bibibop.com/menu/bibibop-keystone-rivers-edge/",
+            notes: "Build-your-own healthy Korean bowls; fast counter service with GF options"
+          },
+          {
+            id: '2',
+            name: "P.F. Chang's",
+            category: "Asian / Chinese",
+            distance: "1.4 mi",
+            active: true,
+            web: "https://www.pfchangs.com",
+            menu: "https://locations.pfchangs.com/in/indianapolis/8601-keystone-crossing.html",
+            notes: "Sit-down Asian chain at Keystone Crossing; good for larger group dinners"
+          },
+          {
+            id: '3',
+            name: "Cafe Korea",
+            category: "Korean",
+            distance: "4.7 mi",
+            active: true,
+            web: "https://cafekoreabbq.com",
+            menu: "https://cafekoreabbq.com",
+            notes: "Authentic family-run Korean bistro on Allisonville Rd; dinner service only"
+          },
+          {
+            id: '4',
+            name: "Metro Diner",
+            category: "American / Diner",
+            distance: "0.4 mi",
+            active: true,
+            web: "https://metrodiner.com",
+            menu: "https://metrodiner.com/locations/indiana/clearwater-crossing/",
+            notes: "Hearty diner classics; great for quick breakfast and team lunch"
+          },
+          {
+            id: '5',
+            name: "Puccini's Pizza Pasta",
+            category: "Italian / Pizza",
+            distance: "0.4 mi",
+            active: true,
+            web: "https://puccinispizzapasta.com",
+            menu: "https://puccinispizzapasta.com",
+            notes: "Local pizza and pasta chain at Clearwater Crossing; solid vegetarian/GF selection"
+          },
+          {
+            id: '6',
+            name: "Curry Leaf Indian Fusion Kitchen",
+            category: "Indian",
+            distance: "1.2 mi",
+            active: true,
+            web: "https://curryleafindianfusion.com",
+            menu: "https://curryleafindianfusion.com",
+            notes: "High-rated Indian fusion kitchen near Keystone; great lunch specials"
+          },
+          {
+            id: '7',
+            name: "Yummy Bowl 82",
+            category: "Asian / Mongolian Grill",
+            distance: "2.1 mi",
+            active: true,
+            web: "https://www.yummybowlindiana.com",
+            menu: "https://www.yummybowlindiana.com",
+            notes: "Customizable stir-fry and noodle bowls on 82nd St"
+          },
+          {
+            id: '8',
+            name: "CoreLife Eatery",
+            category: "Healthy / American",
+            distance: "0.5 mi",
+            active: true,
+            web: "https://www.corelifeeatery.com",
+            menu: "https://www.corelifeeatery.com",
+            notes: "Fast-casual grain bowls, warm broth bowls, and fresh salads"
+          },
+          {
+            id: '9',
+            name: "BRU Burger Bar",
+            category: "American / Burgers",
+            distance: "1.4 mi",
+            active: true,
+            web: "https://www.bruburgerbar.com",
+            menu: "https://www.bruburgerbar.com/location/bru-burger-bar-keystone-in/",
+            notes: "Gourmet burgers and craft beers at River Crossing"
+          },
+          {
+            id: '10',
+            name: "City Barbeque",
+            category: "Barbecue",
+            distance: "2.1 mi",
+            active: true,
+            web: "https://www.citybbq.com",
+            menu: "https://www.citybbq.com",
+            notes: "Counter-serve smokehouse BBQ; fast turnarounds for lunch groups"
+          },
+          {
+            id: '11',
+            name: "Five Guys",
+            category: "Burgers / Fast Food",
+            distance: "2.5 mi",
+            active: true,
+            web: "https://www.fiveguys.com",
+            menu: "https://restaurants.fiveguys.com/5317-east-82nd-street",
+            notes: "Made-to-order burgers and fries; fast ordering"
+          },
+          {
+            id: '12',
+            name: "Piada Italian Street Food",
+            category: "Italian / Fast Casual",
+            distance: "1.3 mi",
+            active: true,
+            web: "https://mypiada.com",
+            menu: "https://mypiada.com/menu/keystone",
+            notes: "Italian wraps, pasta bowls, and street salads; fast-casual assembly line"
+          },
+          {
+            id: '13',
+            name: "The District Tap",
+            category: "American / Sports Bar",
+            distance: "0.5 mi",
+            active: true,
+            web: "https://www.thedistricttap.com",
+            menu: "https://www.thedistricttap.com",
+            notes: "Huge tap list and pub plates; right down the road on 82nd St"
+          },
+          {
+            id: '14',
+            name: "Ale Emporium",
+            category: "Sports Bar / Wings & Pizza",
+            distance: "0.5 mi",
+            active: true,
+            web: "https://aleemporium.com",
+            menu: "https://aleemporium.securetree.com/",
+            notes: "Famous Hermanaki wings and deep-dish pizza on Allisonville Rd; very close"
+          },
+          {
+            id: '15',
+            name: "First Watch",
+            category: "Breakfast / Brunch",
+            distance: "0.6 mi",
+            active: true,
+            web: "https://www.firstwatch.com",
+            menu: "https://www.firstwatch.com/locations/clearwater-crossing/",
+            notes: "Healthy breakfast and lunch spot at Clearwater Crossing; closes at 2:30 PM"
+          }
+        ]
 
         const SECTOR_COLORS = [
             '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', 
